@@ -12,9 +12,5 @@ example:
 test:
 	bazel run //day$(day):main
 
-# make day=00 generate
-generate:
-	bazel run //day$(day):main
-
 install:
 	brew install bazel
