@@ -12,5 +12,9 @@ example:
 test:
 	bazel run //day$(day):main
 
+# make day=05 generate
+generate:
+	cp -r template day$(day)
+
 install:
 	brew install bazel
