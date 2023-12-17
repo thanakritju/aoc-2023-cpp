@@ -22,7 +22,7 @@ array<vector<Rule>, 7> init_rules(vector<string> input)
 {
   array<vector<Rule>, 7> arr;
   int i = -1;
-  for (const auto line : input)
+  for (string line : input)
   {
     if (line.empty())
     {
@@ -53,17 +53,26 @@ array<vector<Rule>, 7> init_rules(vector<string> input)
   return arr;
 }
 
-int solve(vector<string> input)
+vector<long> init_seeds(string input)
 {
-  string seeds = input[0];
-  stringstream seedsStream(seeds);
+  vector<long> seeds;
+  stringstream seedsStream(input);
   string seed;
   seedsStream >> seed;
-  long min = LONG_MAX;
-  array<vector<Rule>, 7> arr = init_rules(input);
   while (seedsStream >> seed)
   {
-    long seedValue = stol(seed);
+    seeds.push_back(stol(seed));
+  }
+  return seeds;
+}
+
+int solve(vector<string> input)
+{
+  long min = LONG_MAX;
+  array<vector<Rule>, 7> arr = init_rules(input);
+  vector<long> seeds = init_seeds(input[0]);
+  for (long seedValue : seeds)
+  {
     for (int i = 0; i < 7; i++)
     {
       cout << "i: " << i;
@@ -102,7 +111,7 @@ int parse_and_run(string_view path)
   fstream file(path);
   if (!file.is_open())
   {
-    cerr << "Failed to open " << quoted(path) << "\n";
+    cerr << "Failed to open " << quoted(path) << endl;
     return 1;
   }
 
@@ -112,8 +121,12 @@ int parse_and_run(string_view path)
   {
     lines.push_back(line);
   }
-  cout << "The part 1 answer is " << solve(lines) << "\n";
-  cout << "The part 2 answer is " << solve2(lines) << "\n";
+  int ans1 = solve(lines);
+  int ans2 = solve2(lines);
+  cout << "--------------------------" << endl;
+  cout << "The part 1 answer is " << ans1 << endl;
+  cout << "The part 2 answer is " << ans2 << endl;
+  cout << "--------------------------" << endl;
 
   return 0;
 }
