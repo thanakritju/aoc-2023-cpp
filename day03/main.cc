@@ -7,7 +7,7 @@
 #include <ranges>
 #include <sstream>
 
-#define VERBOSE
+// #define VERBOSE
 
 int is_special_char(char c)
 {
@@ -87,6 +87,42 @@ int get_number(int jstart, int jend, std::array<char, 140> arr)
   return std::stoi(str);
 }
 
+int get_number(int i, std::array<char, 140> arr)
+{
+  std::string str = "";
+  if (!isdigit(arr[i]))
+  {
+    return 0;
+  }
+  else
+  {
+    str += arr[i];
+    int iright = i + 1;
+    int ileft = i - 1;
+    while (isdigit(arr[iright]))
+    {
+      str = str + arr[iright];
+      iright += 1;
+    }
+    while (isdigit(arr[ileft]))
+    {
+      str = arr[ileft] + str;
+      ileft -= 1;
+    }
+  }
+  return std::stoi(str);
+}
+
+int get_number(int i, int j, std::array<std::array<char, 140>, 140> arr)
+{
+#ifdef VERBOSE
+  std::cout << "\nget_number" << std::endl;
+  std::cout << "i " << i << std::endl;
+  std::cout << "j " << j << std::endl;
+#endif
+  return get_number(j, arr[i]);
+}
+
 std::array<char, 140> parse(std::string line)
 {
   std::array<char, 140> arr;
@@ -155,8 +191,10 @@ int solve(std::vector<std::string> input)
         {
           if (is_part_number(jstart, jend, i, arr))
           {
+#ifdef VERBOSE
             std::cout << "i " << i << " ";
             std::cout << "get_number " << get_number(jstart, jend, arr[i]) << "\n";
+#endif
             sum += get_number(jstart, jend, arr[i]);
           }
           foundDigit = 0;
@@ -167,8 +205,11 @@ int solve(std::vector<std::string> input)
     {
       if (is_part_number(jstart, jend, i, arr))
       {
+
+#ifdef VERBOSE
         std::cout << "i " << i << " ";
         std::cout << "get_number " << get_number(jstart, jend, arr[i]) << "\n";
+#endif
         sum += get_number(jstart, jend, arr[i]);
       }
       foundDigit = 0;
@@ -178,9 +219,125 @@ int solve(std::vector<std::string> input)
   return sum;
 }
 
+int is_gear(char c)
+{
+  if (c == '*')
+  {
+    return 1;
+  }
+  return 0;
+}
+
+int find_numbers(int i, int j, std::array<std::array<char, 140>, 140> arr)
+{
+  int count = 0;
+  int ans = 1;
+  // left
+  if (j - 1 >= 0 && get_number(i, j - 1, arr))
+  {
+    count += 1;
+    ans *= get_number(i, j - 1, arr);
+  }
+  // right
+  if (j + 1 < 140 && get_number(i, j + 1, arr))
+  {
+    count += 1;
+    ans *= get_number(i, j + 1, arr);
+  }
+
+  // bottom
+  if (i + 1 < 140)
+  {
+    if (isdigit(arr[i + 1][j]))
+    {
+      if (get_number(i + 1, j, arr))
+      {
+        count += 1;
+        ans *= get_number(i + 1, j, arr);
+      }
+    }
+    else
+    {
+      if (j - 1 >= 0 && isdigit(arr[i + 1][j - 1]) && get_number(i + 1, j - 1, arr))
+      {
+        count += 1;
+        ans *= get_number(i + 1, j - 1, arr);
+      }
+
+      if (j + 1 < 140 && isdigit(arr[i + 1][j + 1]) && get_number(i + 1, j + 1, arr))
+      {
+        count += 1;
+        ans *= get_number(i + 1, j + 1, arr);
+      }
+    }
+  }
+  // top
+  if (i - 1 >= 0)
+  {
+    if (isdigit(arr[i - 1][j]))
+    {
+      if (get_number(i - 1, j, arr))
+      {
+        count += 1;
+        ans *= get_number(i - 1, j, arr);
+      }
+    }
+    else
+    {
+      if (j - 1 >= 0 && isdigit(arr[i - 1][j - 1]) && get_number(i - 1, j - 1, arr))
+      {
+        count += 1;
+        ans *= get_number(i - 1, j - 1, arr);
+      }
+
+      if (j + 1 < 140 && isdigit(arr[i - 1][j + 1]) && get_number(i - 1, j + 1, arr))
+      {
+        count += 1;
+        ans *= get_number(i - 1, j + 1, arr);
+      }
+    }
+  }
+#ifdef VERBOSE
+  std::cout << "\nfound gear" << std::endl;
+  std::cout << "i " << i << std::endl;
+  std::cout << "j " << j << std::endl;
+  std::cout << "count " << count << std::endl;
+  std::cout << "ans " << ans << std::endl;
+#endif
+  if (count == 2)
+  {
+    return ans;
+  }
+  return 0;
+}
+
 int solve2(std::vector<std::string> input)
 {
-  return 0;
+  int sum = 0;
+  std::array<std::array<char, 140>, 140> arr;
+  for (int i = 0; i < 140; ++i)
+  {
+    if (i < input.size())
+    {
+      arr[i] = parse(input.at(i));
+    }
+    else
+    {
+      arr[i] = parse("");
+    }
+  }
+  for (int i = 0; i < 140; ++i)
+  {
+    for (int j = 0; j < 140; ++j)
+    {
+      if (is_gear(arr[i][j]))
+      {
+        sum += find_numbers(i, j, arr);
+      }
+    }
+  }
+
+  return sum;
 }
 
 int test()
@@ -189,6 +346,12 @@ int test()
   std::cout << "get_number " << get_number(0, 2, parse("467..114..")) << "\n";
   assert(get_number(5, 7, parse("467..114..")) == 114);
   assert(get_number(0, 2, parse("467..114..")) == 467);
+  assert(get_number(0, 2, parse("467..114..")) == 467);
+  assert(get_number(0, parse("467..114..")) == 467);
+  assert(get_number(1, parse("467..114..")) == 467);
+  assert(get_number(2, parse("467..114..")) == 467);
+  assert(get_number(3, parse("467..114..")) == 0);
+  assert(get_number(5, parse("467..114..")) == 114);
   std::cout << "get_number " << get_number(137, 139, parse("....136*755...@.950......................173.............95..........+...............2.877.......*668......+..+.........918*.......62....571")) << "\n";
   return 0;
 }
