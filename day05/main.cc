@@ -6,6 +6,7 @@
 #include <fstream>
 #include <ranges>
 #include <sstream>
+#include <set>
 
 #define VERBOSE
 
@@ -16,6 +17,12 @@ struct Rule
   long lower;
   long upper;
   long diff;
+};
+
+struct Seed
+{
+  long lower;
+  long upper;
 };
 
 array<vector<Rule>, 7> init_rules(vector<string> input)
@@ -66,6 +73,74 @@ vector<long> init_seeds(string input)
   return seeds;
 }
 
+set<long> init_seeds_v2(string input)
+{
+  set<long> seeds;
+  stringstream seedsStream(input);
+  string seed;
+  seedsStream >> seed;
+  bool b = false;
+  long previosSeed = 0;
+  while (seedsStream >> seed)
+  {
+    if (b)
+    {
+      seeds.insert(previosSeed + stol(seed));
+    }
+    else
+    {
+      seeds.insert(stol(seed));
+      previosSeed = stol(seed);
+    }
+    b = !b;
+  }
+  return seeds;
+}
+
+set<long> current_seed(vector<Rule> rules)
+{
+  set<long> seeds;
+  for (Rule r : rules)
+  {
+    seeds.insert(r.lower - r.diff);
+    seeds.insert(r.upper - r.diff);
+  }
+  return seeds;
+}
+
+vector<Seed> init_seeds_object(string s)
+{
+  vector<Seed> seeds;
+  stringstream seedsStream(s);
+  string seed;
+  seedsStream >> seed;
+  string lower;
+  string diff;
+
+  while (seedsStream >> lower && seedsStream >> diff)
+  {
+    Seed s;
+    s.lower = stol(lower);
+    s.upper = stol(lower) + stol(diff);
+    cout << " Seed.lower: " << s.lower << endl;
+    cout << " Seed.upper: " << s.upper << endl;
+    seeds.push_back(s);
+  }
+  return seeds;
+}
+
+bool is_in_seeed_range(long value, vector<Seed> seeds)
+{
+  for (Seed seed : seeds)
+  {
+    if (value >= seed.lower && value <= seed.upper)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 int solve(vector<string> input)
 {
   long min = LONG_MAX;
@@ -97,7 +172,36 @@ int solve(vector<string> input)
 
 int solve2(vector<string> input)
 {
-  return 0;
+  long min = LONG_MAX;
+  array<vector<Rule>, 7> arr = init_rules(input);
+  vector<Seed> seeds = init_seeds_object(input[0]);
+  set<long> currentSeed = current_seed(arr[6]);
+  for (long seedValue : currentSeed)
+  {
+    for (int i = 6; i >= 0; i--)
+    {
+      cout << "i: " << i;
+      cout << " Value: " << seedValue << endl;
+      for (Rule r : arr[i])
+      {
+        if (r.upper - r.diff >= seedValue && seedValue >= r.lower - r.diff)
+        {
+          seedValue -= r.diff;
+          break;
+        }
+      }
+    }
+    if (is_in_seeed_range(seedValue, seeds))
+    {
+      if (seedValue <= min)
+      {
+        min = seedValue;
+      }
+    }
+    cout << endl;
+  }
+
+  return min;
 }
 
 int test()
