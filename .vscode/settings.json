@@ -81,6 +81,8 @@
     "stop_token": "cpp",
     "regex": "cpp",
     "__tree": "cpp",
-    "deque": "cpp"
+    "deque": "cpp",
+    "queue": "cpp",
+    "stack": "cpp"
   }
 }
