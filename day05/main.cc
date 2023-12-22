@@ -17,6 +17,9 @@ struct Rule
   long lower;
   long upper;
   long diff;
+  long source;
+  long destination;
+  long length;
 };
 
 struct Seed
@@ -46,10 +49,13 @@ array<vector<Rule>, 7> init_rules(vector<string> input)
       r.lower = stol(y);
       r.upper = stol(y) + stol(z);
       r.diff = stol(x) - stol(y);
+      r.source = stol(y);
+      r.destination = stol(x);
+      r.length = stol(z);
 
-      cout << "x: " << x;
-      cout << " y: " << y;
-      cout << " z: " << z;
+      cout << "r.source: " << r.source;
+      cout << " r.destination: " << r.destination;
+      cout << " r.length: " << r.length;
       cout << " r.lower: " << r.lower;
       cout << " r.upper: " << r.upper;
       cout << " r.diff: " << r.diff;
@@ -133,7 +139,7 @@ bool is_in_seeed_range(long value, vector<Seed> seeds)
 {
   for (Seed seed : seeds)
   {
-    if (value >= seed.lower && value <= seed.upper)
+    if (value >= seed.lower && value < seed.upper)
     {
       return true;
     }
@@ -172,36 +178,29 @@ int solve(vector<string> input)
 
 int solve2(vector<string> input)
 {
-  long min = LONG_MAX;
   array<vector<Rule>, 7> arr = init_rules(input);
   vector<Seed> seeds = init_seeds_object(input[0]);
-  set<long> currentSeed = current_seed(arr[6]);
-  for (long seedValue : currentSeed)
+  for (long seed = 0; seed < 1000000000; seed++)
   {
+    long seedValue = seed;
     for (int i = 6; i >= 0; i--)
     {
-      cout << "i: " << i;
-      cout << " Value: " << seedValue << endl;
       for (Rule r : arr[i])
       {
-        if (r.upper - r.diff >= seedValue && seedValue >= r.lower - r.diff)
+        if (r.destination <= seedValue && r.destination + r.length > seedValue)
         {
-          seedValue -= r.diff;
+          seedValue = seedValue + r.source - r.destination;
           break;
         }
       }
     }
     if (is_in_seeed_range(seedValue, seeds))
     {
-      if (seedValue <= min)
-      {
-        min = seedValue;
-      }
+      return seed;
     }
-    cout << endl;
   }
 
-  return min;
+  return -1;
 }
 
 int test()
