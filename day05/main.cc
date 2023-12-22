@@ -175,28 +175,42 @@ int solve(vector<string> input)
   }
   return min;
 }
+long getSeedGivenLocation(long step, array<vector<Rule>, 7> arr)
+{
+  for (int i = 6; i >= 0; i--)
+  {
+    for (Rule r : arr[i])
+    {
+      if (r.destination <= step && r.destination + r.length > step)
+      {
+        step = step + r.source - r.destination;
+        break;
+      }
+    }
+  }
+  return step;
+}
 
 int solve2(vector<string> input)
 {
   array<vector<Rule>, 7> arr = init_rules(input);
   vector<Seed> seeds = init_seeds_object(input[0]);
-  for (long seed = 0; seed < 1000000000; seed++)
+  long min = LONG_MAX;
+  for (long seed = 0; seed < 1000000; seed++)
   {
-    long seedValue = seed;
-    for (int i = 6; i >= 0; i--)
-    {
-      for (Rule r : arr[i])
-      {
-        if (r.destination <= seedValue && r.destination + r.length > seedValue)
-        {
-          seedValue = seedValue + r.source - r.destination;
-          break;
-        }
-      }
-    }
+    long seedValue = getSeedGivenLocation(seed * 1000, arr);
     if (is_in_seeed_range(seedValue, seeds))
     {
-      return seed;
+      min = seed * 1000;
+      for (int j = seed * 1000; j > seed * 1000 - 1000; j--)
+      {
+        long seedValue = getSeedGivenLocation(j, arr);
+        if (is_in_seeed_range(seedValue, seeds) && j <= min)
+        {
+          min = j;
+        }
+      }
+      return min;
     }
   }
 
