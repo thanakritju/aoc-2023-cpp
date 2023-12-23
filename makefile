@@ -1,6 +1,10 @@
 current_dir = $(shell pwd)
 
-# make day=00 run
+ifndef day
+$(error day is not set)
+endif
+
+# make day=01 run
 run:
 	bazel run //day$(day):main $(current_dir)/day$(day)/input.txt
 
