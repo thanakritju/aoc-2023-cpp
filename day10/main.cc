@@ -159,6 +159,102 @@ int dfs(char arr[][columns], bool vis[][columns], int row, int col)
   return d;
 }
 
+bool solve_rec(vector<pair<int, int>> *vis, bool wasHere[][columns], char arr[][columns], int col, int row, int xend, int yend, int d)
+{
+  if (col == xend && row == yend && d > 2)
+    return true;
+
+  if (wasHere[row][col])
+  {
+    return false;
+  }
+
+  wasHere[row][col] = true;
+
+  // top
+  if (is_connected(arr, row, col, "top"))
+  {
+    if (solve_rec(vis, wasHere, arr, col, row - 1, xend, yend, d + 1))
+    {
+      (*vis).push_back({col, row});
+      return true;
+    }
+  }
+
+  // bottom
+  if (is_connected(arr, row, col, "bottom"))
+  {
+    if (solve_rec(vis, wasHere, arr, col, row + 1, xend, yend, d + 1))
+    {
+      (*vis).push_back({col, row});
+      return true;
+    }
+  }
+
+  // left
+  if (is_connected(arr, row, col, "left"))
+  {
+    if (solve_rec(vis, wasHere, arr, col - 1, row, xend, yend, d + 1))
+    {
+      (*vis).push_back({col, row});
+      return true;
+    }
+  }
+
+  // right
+  if (is_connected(arr, row, col, "right"))
+  {
+    if (solve_rec(vis, wasHere, arr, col + 1, row, xend, yend, d + 1))
+    {
+      (*vis).push_back({col, row});
+      return true;
+    }
+  }
+  return false;
+}
+
+void print_arr(bool vis[][columns])
+{
+  for (int i = 0; i < columns; i++)
+  {
+    for (int j = 0; j < rows; j++)
+    {
+      if (vis[i][j])
+      {
+        cout << '#';
+      }
+      else
+      {
+        cout << '.';
+      }
+    }
+    cout << endl;
+  }
+}
+
+int shoelace(vector<pair<int, int>> nums, char arr[][columns])
+{
+  vector<int> xs;
+  vector<int> ys;
+  int count = nums.size();
+  int sum = 0;
+  cout << "count: " << count << endl;
+  for (pair p : nums)
+  {
+    cout << "x: " << p.first << ", y: " << p.second << endl;
+    xs.push_back(p.first);
+    ys.push_back(p.second);
+  }
+  for (int i = 0; i < count; ++i)
+  {
+    sum += xs[i] * ys[(i + 1) % count];
+    sum -= ys[i] * xs[(i + 1) % count];
+  }
+
+  // pick's + shoelace
+  return abs(sum) / 2 + 1 - count / 2;
+}
+
 int solve(vector<string> input)
 {
   int x, y;
@@ -192,7 +288,8 @@ int solve2(vector<string> input)
 {
   int x, y;
   char arr[rows][columns];
-  bool vis[rows][columns];
+  vector<pair<int, int>> vis;
+  bool wasHere[rows][columns];
   int j = 0;
   for (string line : input)
   {
@@ -205,16 +302,16 @@ int solve2(vector<string> input)
         x = i;
       }
       arr[j][i] = c;
-      vis[j][i] = false;
+      wasHere[j][i] = false;
       i++;
     }
     j++;
   }
   cout << "starting point x: " << x << ", y: " << y << endl;
   cout << "starting point value: " << arr[y][x] << endl;
-  vis[y][x] = true;
-  int ans = dfs(arr, vis, y + 1, x);
-  return 0;
+  solve_rec(&vis, wasHere, arr, x, y + 1, x, y, 1);
+  print_arr(wasHere);
+  return shoelace(vis, arr);
 }
 
 int test()
