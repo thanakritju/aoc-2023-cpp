@@ -13,7 +13,7 @@
 
 using namespace std;
 
-map<pair<string, vector<int>>, int> dp;
+int dp[100][100][100] = {{{0}}};
 
 bool check_list(string line, vector<int> expected)
 {
@@ -131,9 +131,62 @@ int search(string t, vector<int> nums)
   }
 }
 
-int search_v2(string t, vector<int> nums)
+int search_v2(string s, vector<int> nums, int n)
 {
-  return 0;
+  string substring(s);
+  if (substring.size() == 0)
+  {
+    if (nums.size() == n)
+    {
+      return 1;
+    }
+    return 0;
+  }
+  if (nums.size() == n)
+  {
+    for (int x = 0; x < substring.size(); x++)
+    {
+      if (substring[x] == '#')
+      {
+        return 0;
+      }
+    }
+  }
+  int sum = -1;
+  for (int i = n; i < nums.size(); i++)
+  {
+    sum += nums[i] + 1;
+  }
+  if (substring.size() < sum)
+  {
+    return 0;
+  }
+
+  if (substring[0] == '.')
+  {
+    return search_v2(s.substr(1), nums, n);
+  }
+
+  if (substring[0] == '#')
+  {
+    int run = nums[n];
+    for (int i = 0; i < run; i++)
+    {
+      if (substring[i] == '.')
+      {
+        return 0;
+      }
+    }
+    if (substring[run] == '#')
+    {
+      return 0;
+    }
+    return search_v2(s.substr(run), nums, n + 1);
+  }
+  string newstring1 = '#' + substring.substr(1);
+  string newstring2 = '.' + substring.substr(1);
+
+  return search_v2(newstring1, nums, n);
 }
 
 int get_arrangement(string line)
@@ -150,7 +203,7 @@ int get_arrangement(string line)
   {
     nums.push_back(stoi(numstring));
   }
-  return search(puzzle, nums);
+  return search_v2(puzzle, nums, 0);
 }
 
 int get_arrangement_5(string line)
@@ -216,6 +269,7 @@ int solve2(vector<string> input)
 
 int test()
 {
+  cout << get_arrangement("???.### 1,1,3") << endl;
   assert(search("???.###", {1, 1, 3}) == 1);
   assert(get_arrangement(".?..?????..##???.??? 1,4,2,1,1,1") == 4);
   assert(get_arrangement_5("???.### 1,1,3") == 1);
