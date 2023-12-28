@@ -131,18 +131,19 @@ int search(string t, vector<int> nums)
   }
 }
 
-int search_v2(string s, vector<int> nums, int n)
+int search_v2(string s, vector<int> nums)
 {
   string substring(s);
   if (substring.size() == 0)
   {
-    if (nums.size() == n)
+    if (nums.size() == 0)
     {
       return 1;
     }
     return 0;
   }
-  if (nums.size() == n)
+
+  if (nums.size() == 0)
   {
     for (int x = 0; x < substring.size(); x++)
     {
@@ -151,9 +152,11 @@ int search_v2(string s, vector<int> nums, int n)
         return 0;
       }
     }
+    return 1;
   }
+
   int sum = -1;
-  for (int i = n; i < nums.size(); i++)
+  for (int i = 0; i < nums.size(); i++)
   {
     sum += nums[i] + 1;
   }
@@ -164,12 +167,13 @@ int search_v2(string s, vector<int> nums, int n)
 
   if (substring[0] == '.')
   {
-    return search_v2(s.substr(1), nums, n);
+    return search_v2(s.substr(1), nums);
   }
 
   if (substring[0] == '#')
   {
-    int run = nums[n];
+    int run = nums.back();
+    nums.pop_back();
     for (int i = 0; i < run; i++)
     {
       if (substring[i] == '.')
@@ -181,12 +185,19 @@ int search_v2(string s, vector<int> nums, int n)
     {
       return 0;
     }
-    return search_v2(s.substr(run), nums, n + 1);
+    if (run + 1 <= substring.size())
+    {
+      return search_v2(substring.substr(run + 1), nums);
+    }
+    else
+    {
+      return search_v2("", nums);
+    }
   }
   string newstring1 = '#' + substring.substr(1);
   string newstring2 = '.' + substring.substr(1);
 
-  return search_v2(newstring1, nums, n);
+  return search_v2(newstring1, nums) + search_v2(newstring2, nums);
 }
 
 int get_arrangement(string line)
@@ -203,7 +214,8 @@ int get_arrangement(string line)
   {
     nums.push_back(stoi(numstring));
   }
-  return search_v2(puzzle, nums, 0);
+  reverse(nums.begin(), nums.end());
+  return search_v2(puzzle, nums);
 }
 
 int get_arrangement_5(string line)
@@ -236,15 +248,9 @@ int get_arrangement_5(string line)
   new_nums.insert(new_nums.end(), nums.begin(), nums.end());
   new_nums.insert(new_nums.end(), nums.begin(), nums.end());
   new_nums.insert(new_nums.end(), nums.begin(), nums.end());
-  cout << "new_puzzle: " << new_puzzle << endl;
-  cout << "new_nums: ";
-  for (int n : new_nums)
-  {
-    cout << n << " ";
-  }
-  cout << endl;
 
-  return search(new_puzzle, new_nums);
+  reverse(new_nums.begin(), new_nums.end());
+  return search_v2(new_puzzle, new_nums);
 }
 
 int solve(vector<string> input)
@@ -271,15 +277,15 @@ int test()
 {
   cout << get_arrangement("???.### 1,1,3") << endl;
   assert(search("???.###", {1, 1, 3}) == 1);
-  assert(get_arrangement(".?..?????..##???.??? 1,4,2,1,1,1") == 4);
-  assert(get_arrangement_5("???.### 1,1,3") == 1);
-  assert(get_arrangement_5("?###???????? 3,2,1") == 506250);
   assert(get_arrangement("???.### 1,1,3") == 1);
   assert(get_arrangement(".??..??...?##. 1,1,3") == 4);
   assert(get_arrangement("?#?#?#?#?#?#?#? 1,3,1,6") == 1);
   assert(get_arrangement("????.#...#... 4,1,1") == 1);
   assert(get_arrangement("????.######..#####. 1,6,5") == 4);
   assert(get_arrangement("?###???????? 3,2,1") == 10);
+  assert(get_arrangement(".?..?????..##???.??? 1,4,2,1,1,1") == 4);
+  assert(get_arrangement_5("???.### 1,1,3") == 1);
+  assert(get_arrangement_5("?###???????? 3,2,1") == 506250);
   return 0;
 }
 
