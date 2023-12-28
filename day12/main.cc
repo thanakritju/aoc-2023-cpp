@@ -13,7 +13,7 @@
 
 using namespace std;
 
-int dp[100][100][100] = {{{0}}};
+map<string, map<vector<int>, long long>> dp;
 
 bool check_list(string line, vector<int> expected)
 {
@@ -131,10 +131,13 @@ int search(string t, vector<int> nums)
   }
 }
 
-int search_v2(string s, vector<int> nums)
+long long search_v2(string s, vector<int> nums)
 {
-  string substring(s);
-  if (substring.size() == 0)
+  if (dp.find(s) != dp.end() && dp[s].find(nums) != dp[s].end())
+  {
+    return dp[s][nums];
+  }
+  if (s.size() == 0)
   {
     if (nums.size() == 0)
     {
@@ -145,9 +148,9 @@ int search_v2(string s, vector<int> nums)
 
   if (nums.size() == 0)
   {
-    for (int x = 0; x < substring.size(); x++)
+    for (int x = 0; x < s.size(); x++)
     {
-      if (substring[x] == '#')
+      if (s[x] == '#')
       {
         return 0;
       }
@@ -160,44 +163,43 @@ int search_v2(string s, vector<int> nums)
   {
     sum += nums[i] + 1;
   }
-  if (substring.size() < sum)
+  if (s.size() < sum)
   {
     return 0;
   }
 
-  if (substring[0] == '.')
+  if (s[0] == '.')
   {
     return search_v2(s.substr(1), nums);
   }
 
-  if (substring[0] == '#')
+  if (s[0] == '#')
   {
     int run = nums.back();
     nums.pop_back();
     for (int i = 0; i < run; i++)
     {
-      if (substring[i] == '.')
+      if (s[i] == '.')
       {
         return 0;
       }
     }
-    if (substring[run] == '#')
+    if (s[run] == '#')
     {
       return 0;
     }
-    if (run + 1 <= substring.size())
+    if (run + 1 <= s.size())
     {
-      return search_v2(substring.substr(run + 1), nums);
+      return search_v2(s.substr(run + 1), nums);
     }
     else
     {
-      return search_v2("", nums);
+      return 1;
     }
   }
-  string newstring1 = '#' + substring.substr(1);
-  string newstring2 = '.' + substring.substr(1);
 
-  return search_v2(newstring1, nums) + search_v2(newstring2, nums);
+  dp[s][nums] = search_v2('#' + s.substr(1), nums) + search_v2('.' + s.substr(1), nums);
+  return dp[s][nums];
 }
 
 int get_arrangement(string line)
@@ -218,7 +220,7 @@ int get_arrangement(string line)
   return search_v2(puzzle, nums);
 }
 
-int get_arrangement_5(string line)
+long long get_arrangement_5(string line)
 {
   stringstream ss(line);
   string puzzle;
@@ -263,9 +265,9 @@ int solve(vector<string> input)
   return sum;
 }
 
-int solve2(vector<string> input)
+long long solve2(vector<string> input)
 {
-  int sum = 0;
+  long long sum = 0;
   for (string line : input)
   {
     sum += get_arrangement_5(line);
@@ -306,7 +308,25 @@ int parse_and_run(string_view path)
     lines.push_back(line);
   }
   int ans1 = solve(lines);
-  int ans2 = solve2(lines);
+  long long ans2 = solve2(lines);
+  for (const auto &outerPair : dp)
+  {
+    const std::string &outerKey = outerPair.first;
+    std::cout << "Outer Key: " << outerKey << std::endl;
+
+    for (const auto &innerPair : outerPair.second)
+    {
+      const std::vector<int> &innerKey = innerPair.first;
+      const long long &value = innerPair.second;
+
+      std::cout << "  Inner Key: [";
+      for (const auto &element : innerKey)
+      {
+        std::cout << element << " ";
+      }
+      std::cout << "], Value: " << value << std::endl;
+    }
+  }
   cout << "--------------------------" << endl;
   cout << "The part 1 answer is " << ans1 << endl;
   cout << "The part 2 answer is " << ans2 << endl;
