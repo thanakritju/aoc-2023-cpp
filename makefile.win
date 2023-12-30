@@ -18,7 +18,7 @@ test:
 
 # make -f makefile.win day=05 generate
 generate:
-	cp -r template day$(day)
+	xcopy template day$(day)\ /E/H
 
 install:
 	brew install bazel
