@@ -10,9 +10,29 @@
 
 using namespace std;
 
+int my_hash(string s)
+{
+  int v = 0;
+  for (char c : s)
+  {
+    v += c;
+    v *= 17;
+    v %= 256;
+  }
+  return v;
+}
+
 long solve(vector<string> input)
 {
-  return 0;
+  stringstream ss(input[0]);
+  string token;
+  long sum = 0;
+  while (getline(ss, token, ','))
+  {
+    cout << token << endl;
+    sum += my_hash(token);
+  };
+  return sum;
 }
 
 long solve2(vector<string> input)
@@ -22,6 +42,8 @@ long solve2(vector<string> input)
 
 int test()
 {
+  cout << my_hash("HASH") << endl;
+  assert(my_hash("HASH") == 52);
   return 0;
 }
 
