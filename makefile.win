@@ -1,16 +1,14 @@
-current_dir = $(shell cd)
-
 ifndef day
 $(error day is not set)
 endif
 
 # make -f makefile.win day=01 run
 run:
-	bazel run //day$(day):main $(current_dir)/day$(day)/input.txt
+	bazel run //day$(day):main C:\Users\USER\code\aoc-2023-cpp\day$(day)\input.txt
 
 # make -f makefile.win day=14 example
 example:
-	bazel run //day$(day):main $(current_dir)/day$(day)/example.txt
+	bazel run //day$(day):main C:\Users\USER\code\aoc-2023-cpp\day$(day)\example.txt
 
 # make -f makefile.win day=00 test
 test:
@@ -18,7 +16,7 @@ test:
 
 # make -f makefile.win day=05 generate
 generate:
-	xcopy template day$(day)\ /E/H
+	cp -r template day$(day)
 
 install:
 	brew install bazel

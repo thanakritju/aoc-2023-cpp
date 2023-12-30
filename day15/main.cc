@@ -5,6 +5,7 @@
 #include <fstream>
 #include <ranges>
 #include <sstream>
+#include <map>
 
 #define VERBOSE
 
@@ -29,7 +30,6 @@ long solve(vector<string> input)
   long sum = 0;
   while (getline(ss, token, ','))
   {
-    cout << token << endl;
     sum += my_hash(token);
   };
   return sum;
@@ -37,13 +37,85 @@ long solve(vector<string> input)
 
 long solve2(vector<string> input)
 {
-  return 0;
+  long sum = 0;
+  map<int, vector<pair<string, int>>> m;
+  stringstream ss(input[0]);
+  string token;
+  while (getline(ss, token, ','))
+  {
+    string sub_token;
+    stringstream sstoken(token);
+    if (token.find('=') != -1)
+    {
+      getline(sstoken, sub_token, '=');
+      string key = sub_token;
+      getline(sstoken, sub_token, '=');
+      int value = stoi(sub_token);
+      cout << "inserting... key: " << key << " value: " << value << endl;
+
+      int i = 0;
+      bool found = false;
+      for (pair<string, int> each : m[my_hash(key)])
+      {
+        if (each.first == key)
+        {
+          each.second = value;
+          found = true;
+          break;
+        }
+        i++;
+      }
+      if (!found)
+      {
+        m[my_hash(key)].push_back({key, value});
+      }
+      else
+      {
+        m[my_hash(key)][i] = {m[my_hash(key)][i].first, value};
+      }
+    }
+    else
+    {
+      getline(sstoken, sub_token, '-');
+      string key = sub_token;
+      cout << "removing... key: " << key << endl;
+      int i = 0;
+      bool found = false;
+      for (pair<string, int> each : m[my_hash(key)])
+      {
+        if (each.first == key)
+        {
+          found = true;
+          break;
+        }
+        i++;
+      }
+      if (found)
+      {
+        m[my_hash(key)].erase(m[my_hash(key)].begin() + i);
+      }
+    }
+  };
+  for (pair<int, vector<pair<string, int>>> p : m)
+  {
+    int i = 1;
+    for (pair<string, int> each : p.second)
+    {
+      cout << p.first + 1 << " " << i << " " << each.second << endl;
+      sum += (p.first + 1) * i * each.second;
+      i++;
+    }
+  }
+  return sum;
 }
 
 int test()
 {
   cout << my_hash("HASH") << endl;
   assert(my_hash("HASH") == 52);
+  assert(my_hash("rn") == 0);
+  assert(my_hash("qp") == 1);
+  assert(my_hash("ot") == 3);
   return 0;
 }
 
