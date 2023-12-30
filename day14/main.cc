@@ -5,11 +5,17 @@
 #include <fstream>
 #include <ranges>
 #include <sstream>
-#include <set>
+#include <map>
 
 #define VERBOSE
 
 using namespace std;
+
+struct platform
+{
+  int length;
+  map<pair<int, int>, bool> map;
+};
 
 string sort(string s)
 {
@@ -50,9 +56,10 @@ vector<string> sort_all(vector<string> input)
   return vs;
 }
 
-vector<string> rotate_clockwise(vector<string> input)
+vector<string> rotate_cclockwise(vector<string> input)
 {
   vector<string> vs;
+  int n = input.size() - 1;
   for (string _ : input)
   {
     vs.push_back("");
@@ -60,11 +67,11 @@ vector<string> rotate_clockwise(vector<string> input)
 
   for (string s : input)
   {
-    int row = 0;
+    int row = n;
     for (char c : s)
     {
-      vs[row] = c + vs[row];
-      row++;
+      vs[row] = vs[row] + c;
+      row--;
     }
   }
 
@@ -99,14 +106,237 @@ void print(vector<string> input)
   cout << endl;
 }
 
+platform init(vector<string> input)
+{
+  platform p;
+  map<pair<int, int>, bool> m;
+  int i = 0;
+  for (string s : input)
+  {
+    int j = 0;
+    for (char c : s)
+    {
+      if (c == 'O')
+      {
+        m[{i, j}] = false;
+      }
+      if (c == '#')
+      {
+        m[{i, j}] = true;
+      }
+      j++;
+    }
+    i++;
+  }
+  p.map = m;
+  p.length = input.size();
+  return p;
+}
+
+platform sort(platform p, string direction)
+{
+  platform np;
+  map<pair<int, int>, bool> m;
+  if (direction == "north")
+  {
+    for (int i = 0; i < p.length; i++)
+    {
+      int indexSharp = -1;
+      int countO = 0;
+      for (int j = 0; j < p.length; j++)
+      {
+        if (p.map.find({j, i}) != p.map.end())
+        {
+          if (!p.map[{j, i}])
+          {
+            countO++;
+          }
+          if (p.map[{j, i}])
+          {
+            m[{j, i}] = true;
+            for (int x = indexSharp + 1; x < indexSharp + countO + 1; x++)
+            {
+              m[{x, i}] = false;
+            }
+            countO = 0;
+            indexSharp = j;
+          }
+        }
+      }
+      for (int x = indexSharp + 1; x < indexSharp + countO + 1; x++)
+      {
+        m[{x, i}] = false;
+      }
+    }
+  }
+
+  if (direction == "west")
+  {
+    for (int i = 0; i < p.length; i++)
+    {
+      int indexSharp = -1;
+      int countO = 0;
+      for (int j = 0; j < p.length; j++)
+      {
+        if (p.map.find({i, j}) != p.map.end())
+        {
+          if (!p.map[{i, j}])
+          {
+            countO++;
+          }
+          if (p.map[{i, j}])
+          {
+            m[{i, j}] = true;
+            for (int x = indexSharp + 1; x < indexSharp + countO + 1; x++)
+            {
+              m[{i, x}] = false;
+            }
+            countO = 0;
+            indexSharp = j;
+          }
+        }
+      }
+      for (int x = indexSharp + 1; x < indexSharp + countO + 1; x++)
+      {
+        m[{i, x}] = false;
+      }
+    }
+  }
+
+  if (direction == "south")
+  {
+    for (int i = 0; i < p.length; i++)
+    {
+      int countO = 0;
+      for (int j = 0; j < p.length; j++)
+      {
+        if (p.map.find({j, i}) != p.map.end())
+        {
+          if (!p.map[{j, i}])
+          {
+            countO++;
+          }
+          if (p.map[{j, i}])
+          {
+            m[{j, i}] = true;
+            for (int x = j - 1; x > j - countO - 1; x--)
+            {
+              m[{x, i}] = false;
+            }
+            countO = 0;
+          }
+        }
+      }
+      for (int x = p.length - 1; x > p.length - countO - 1; x--)
+      {
+        m[{x, i}] = false;
+      }
+    }
+  }
+
+  if (direction == "east")
+  {
+    for (int i = 0; i < p.length; i++)
+    {
+      int indexSharp = -1;
+      int countO = 0;
+      for (int j = 0; j < p.length; j++)
+      {
+        if (p.map.find({i, j}) != p.map.end())
+        {
+          if (!p.map[{i, j}])
+          {
+            countO++;
+          }
+          if (p.map[{i, j}])
+          {
+            m[{i, j}] = true;
+            for (int x = j - 1; x > j - countO - 1; x--)
+            {
+              m[{i, x}] = false;
+            }
+            countO = 0;
+            indexSharp = j;
+          }
+        }
+      }
+      for (int x = p.length - 1; x > p.length - countO - 1; x--)
+      {
+        m[{i, x}] = false;
+      }
+    }
+  }
+
+  np.map = m;
+  np.length = p.length;
+  return np;
+}
+
+long count_load(platform p)
+{
+  long sum = 0;
+  for (int i = 0; i < p.length; i++)
+  {
+    for (int j = 0; j < p.length; j++)
+    {
+      if (p.map.find({i, j}) != p.map.end())
+      {
+        if (!p.map[{i, j}])
+        {
+          sum += p.length - i;
+        }
+      }
+    }
+  }
+  return sum;
+}
+
+void print(platform p)
+{
+
+  for (int i = 0; i < p.length; i++)
+  {
+    for (int j = 0; j < p.length; j++)
+    {
+      if (p.map.find({i, j}) != p.map.end())
+      {
+        if (!p.map[{i, j}])
+        {
+          cout << "O";
+        }
+        else
+        {
+          cout << "#";
+        }
+      }
+      else
+      {
+        cout << ".";
+      }
+    }
+    cout << endl;
+  }
+  cout << endl;
+}
+
 long solve(vector<string> input)
 {
-  return count_load(sort_all(rotate_clockwise(rotate_clockwise(rotate_clockwise(input)))));
+  platform p = init(input);
+  return count_load(sort(p, "north"));
 }
 
 long solve2(vector<string> input)
 {
-  return 0;
+  platform p = init(input);
+  for (int i = 0; i < 200; i++)
+  {
+    p = sort(p, "north");
+    p = sort(p, "west");
+    p = sort(p, "south");
+    p = sort(p, "east");
+    cout << i << " " << count_load(p) << endl;
+  }
+  return count_load(p);
 }
 
 int test()
