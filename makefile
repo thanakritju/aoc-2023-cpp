@@ -6,15 +6,15 @@ endif
 
 # make day=01 run
 run:
-	bazel run //day$(day):main $(current_dir)/day$(day)/input.txt
+	bazel run --config=linux //day$(day):main $(current_dir)/day$(day)/input.txt
 
 # make day=01 example
 example:
-	bazel run //day$(day):main $(current_dir)/day$(day)/example.txt
+	bazel run --config=linux //day$(day):main $(current_dir)/day$(day)/example.txt
 
 # make day=00 test
 test:
-	bazel run //day$(day):main
+	bazel run --config=linux //day$(day):main
 
 # make day=05 generate
 generate:

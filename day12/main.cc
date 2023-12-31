@@ -2,7 +2,6 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include <string_view>
 #include <fstream>
 #include <ranges>
 #include <sstream>
@@ -291,13 +290,13 @@ int test()
   return 0;
 }
 
-int parse_and_run(string_view path)
+int parse_and_run(string path)
 {
   vector<string> data;
-  fstream file(path);
+  ifstream file(path);
   if (!file.is_open())
   {
-    cerr << "Failed to open " << quoted(path) << endl;
+    cerr << "Failed to open " << path << endl;
     return 1;
   }
 
@@ -307,26 +306,8 @@ int parse_and_run(string_view path)
   {
     lines.push_back(line);
   }
-  int ans1 = solve(lines);
-  long long ans2 = solve2(lines);
-  for (const auto &outerPair : dp)
-  {
-    const std::string &outerKey = outerPair.first;
-    std::cout << "Outer Key: " << outerKey << std::endl;
-
-    for (const auto &innerPair : outerPair.second)
-    {
-      const std::vector<int> &innerKey = innerPair.first;
-      const long long &value = innerPair.second;
-
-      std::cout << "  Inner Key: [";
-      for (const auto &element : innerKey)
-      {
-        std::cout << element << " ";
-      }
-      std::cout << "], Value: " << value << std::endl;
-    }
-  }
+  long ans1 = solve(lines);
+  long ans2 = solve2(lines);
   cout << "--------------------------" << endl;
   cout << "The part 1 answer is " << ans1 << endl;
   cout << "The part 2 answer is " << ans2 << endl;

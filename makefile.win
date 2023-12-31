@@ -4,15 +4,15 @@ endif
 
 # make -f makefile.win day=01 run
 run:
-	bazel run //day$(day):main C:\Users\USER\code\aoc-2023-cpp\day$(day)\input.txt
+	bazel run --config=windows //day$(day):main C:\Users\USER\code\aoc-2023-cpp\day$(day)\input.txt
 
 # make -f makefile.win day=14 example
 example:
-	bazel run //day$(day):main C:\Users\USER\code\aoc-2023-cpp\day$(day)\example.txt
+	bazel run --config=windows //day$(day):main C:\Users\USER\code\aoc-2023-cpp\day$(day)\example.txt
 
 # make -f makefile.win day=00 test
 test:
-	bazel run //day$(day):main
+	bazel run --config=windows //day$(day):main
 
 # make -f makefile.win day=05 generate
 generate:

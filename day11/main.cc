@@ -2,7 +2,6 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include <string_view>
 #include <fstream>
 #include <ranges>
 #include <sstream>
@@ -147,13 +146,13 @@ int test()
   return 0;
 }
 
-int parse_and_run(string_view path)
+int parse_and_run(string path)
 {
   vector<string> data;
-  fstream file(path);
+  ifstream file(path);
   if (!file.is_open())
   {
-    cerr << "Failed to open " << quoted(path) << endl;
+    cerr << "Failed to open " << path << endl;
     return 1;
   }
 
@@ -163,7 +162,7 @@ int parse_and_run(string_view path)
   {
     lines.push_back(line);
   }
-  int ans1 = solve(lines);
+  long ans1 = solve(lines);
   long ans2 = solve2(lines);
   cout << "--------------------------" << endl;
   cout << "The part 1 answer is " << ans1 << endl;
