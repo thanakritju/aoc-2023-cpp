@@ -232,7 +232,7 @@ void print_arr(bool vis[][columns])
   }
 }
 
-int shoelace(vector<pair<int, int>> nums, char arr[][columns])
+int shoelace(vector<pair<int, int>> nums)
 {
   vector<int> xs;
   vector<int> ys;
@@ -311,7 +311,7 @@ int solve2(vector<string> input)
   cout << "starting point value: " << arr[y][x] << endl;
   solve_rec(&vis, wasHere, arr, x, y + 1, x, y, 1);
   print_arr(wasHere);
-  return shoelace(vis, arr);
+  return shoelace(vis);
 }
 
 int test()
