@@ -43,6 +43,26 @@ struct Rating
   }
 };
 
+struct Ranges
+{
+  vector<pair<int, int>> x;
+  vector<pair<int, int>> m;
+  vector<pair<int, int>> a;
+  vector<pair<int, int>> s;
+
+  Ranges(int start, int end)
+  {
+    x = {{start, end}};
+    m = {{start, end}};
+    a = {{start, end}};
+    s = {{start, end}};
+  }
+
+  long long Cal()
+  {
+  }
+};
+
 regex pattern1("(\\w+)\\{(.*)\\}");
 regex pattern2("\\{x=(\\d+),m=(\\d+),a=(\\d+),s=(\\d+)\\}");
 regex pattern3("(\\w+)([><])(\\d+):(\\w+)");
@@ -174,6 +194,36 @@ long solve(vector<string> input)
 
 long solve2(vector<string> input)
 {
+  smatch match;
+  Workflows w;
+  for (string line : input)
+  {
+    if (line.empty())
+    {
+      break;
+    }
+    if (std::regex_search(line, match, pattern1))
+    {
+      string key;
+      key = match.str(1);
+      string rules;
+      rules = match.str(2);
+      stringstream ss(rules);
+      string rule;
+      Rule r;
+      while (getline(ss, rule, ','))
+      {
+        r.push_back(rule);
+      }
+      w[key] = r;
+    }
+    else
+    {
+      std::cerr << "No match found." << std::endl;
+      throw std::runtime_error("No match found.");
+    }
+  }
+
   return 0;
 }
 
