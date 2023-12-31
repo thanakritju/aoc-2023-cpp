@@ -6,6 +6,7 @@
 #include <ranges>
 #include <sstream>
 #include <map>
+#include <regex>
 
 #define VERBOSE
 
@@ -20,11 +21,155 @@ struct Rating
   short a;
   short s;
   short sum;
+
+  short get_value(char c)
+  {
+    if (c == 'x')
+    {
+      return x;
+    }
+    if (c == 'm')
+    {
+      return m;
+    }
+    if (c == 'a')
+    {
+      return a;
+    }
+    if (c == 's')
+    {
+      return s;
+    }
+  }
 };
+
+regex pattern1("(\\w+)\\{(.*)\\}");
+regex pattern2("\\{x=(\\d+),m=(\\d+),a=(\\d+),s=(\\d+)\\}");
+regex pattern3("(\\w+)([><])(\\d+):(\\w+)");
+
+string get_next(Rule rule, Rating rating)
+{
+  smatch match;
+  for (string each : rule)
+  {
+    if (each.find(':') != -1)
+    {
+      if (std::regex_search(each, match, pattern3))
+      {
+        char key = match.str(1)[0];
+        string operation = match.str(2);
+        int value = stoi(match.str(3));
+        string direction = match.str(4);
+        if (operation == ">")
+        {
+          if (rating.get_value(key) > value)
+          {
+            return direction;
+          }
+          else
+          {
+            continue;
+          }
+        }
+        if (operation == "<")
+        {
+          if (rating.get_value(key) < value)
+          {
+            return direction;
+          }
+          else
+          {
+            continue;
+          }
+        }
+      }
+      else
+      {
+        std::cerr << "No match found." << std::endl;
+        throw std::runtime_error("No match found.");
+      }
+    }
+    else
+    {
+      return each;
+    }
+  }
+  throw std::runtime_error("No match found.");
+}
 
 long solve(vector<string> input)
 {
-  return 0;
+  smatch match;
+  bool found = false;
+  Workflows w;
+  vector<Rating> ratings;
+  for (string line : input)
+  {
+    if (line.empty())
+    {
+      found = true;
+      continue;
+    }
+    if (!found)
+    {
+      if (std::regex_search(line, match, pattern1))
+      {
+        string key;
+        key = match.str(1);
+        string rules;
+        rules = match.str(2);
+        stringstream ss(rules);
+        string rule;
+        Rule r;
+        while (getline(ss, rule, ','))
+        {
+          r.push_back(rule);
+        }
+        w[key] = r;
+      }
+      else
+      {
+        std::cerr << "No match found." << std::endl;
+        throw std::runtime_error("No match found.");
+      }
+    }
+    else
+    {
+      if (std::regex_search(line, match, pattern2))
+      {
+        Rating r;
+        r.x = stoi(match.str(1));
+        r.m = stoi(match.str(2));
+        r.a = stoi(match.str(3));
+        r.s = stoi(match.str(4));
+        r.sum = r.x + r.m + r.a + r.s;
+        ratings.push_back(r);
+      }
+      else
+      {
+        std::cerr << "No match found." << std::endl;
+        throw std::runtime_error("No match found.");
+      }
+    }
+  }
+
+  long sum;
+
+  for (Rating r : ratings)
+  {
+    string s = "in";
+
+    while (s != "A" && s != "R")
+    {
+      s = get_next(w[s], r);
+    }
+    if (s == "A")
+    {
+      sum += r.sum;
+    }
+  }
+
+  return sum;
 }
 
 long solve2(vector<string> input)
@@ -34,6 +179,14 @@ long solve2(vector<string> input)
 
 int test()
 {
+  Rating r;
+  r.x = 787;
+  r.m = 2655;
+  r.a = 1222;
+  r.s = 2876;
+  assert(get_next({"s<1351:px", "qqz"}, r) == "qqz");
+  r.s = 0;
+  assert(get_next({"s<1351:px", "qqz"}, r) == "px");
   return 0;
 }
 
