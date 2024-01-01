@@ -23,10 +23,9 @@ struct Node
   char direction;
   short times;
   int value;
-  Node *prev;
 
-  Node(int r, int c, char dir, short t, int val, Node *prevNode = nullptr)
-      : row(r), col(c), direction(dir), times(t), value(val), prev(prevNode)
+  Node(int r, int c, char dir, short t, int val)
+      : row(r), col(c), direction(dir), times(t), value(val)
   {
   }
 
@@ -35,7 +34,7 @@ struct Node
     return value > other.value;
   }
 
-  vector<Node> Next(int v)
+  vector<Node> Next(short arr[rows][columns])
   {
     vector<Node> vn;
     // left
@@ -43,14 +42,14 @@ struct Node
     {
       if (times < 3 && direction != '>')
       {
-        vn.push_back(Node(row, col - 1, '<', times + 1, value + v, this));
+        vn.push_back(Node(row, col - 1, '<', times + 1, value + arr[row][col - 1]));
       }
     }
     else
     {
       if (direction != '>')
       {
-        vn.push_back(Node(row, col - 1, '<', 1, value + v, this));
+        vn.push_back(Node(row, col - 1, '<', 1, value + arr[row][col - 1]));
       }
     }
 
@@ -59,14 +58,14 @@ struct Node
     {
       if (times < 3 && direction != '<')
       {
-        vn.push_back(Node(row, col + 1, '>', times + 1, value + v, this));
+        vn.push_back(Node(row, col + 1, '>', times + 1, value + arr[row][col + 1]));
       }
     }
     else
     {
       if (direction != '<')
       {
-        vn.push_back(Node(row, col + 1, '>', 1, value + v, this));
+        vn.push_back(Node(row, col + 1, '>', 1, value + arr[row][col + 1]));
       }
     }
 
@@ -75,14 +74,14 @@ struct Node
     {
       if (times < 3 && direction != '^')
       {
-        vn.push_back(Node(row + 1, col, 'v', times + 1, value + v, this));
+        vn.push_back(Node(row + 1, col, 'v', times + 1, value + arr[row + 1][col]));
       }
     }
     else
     {
       if (direction != '^')
       {
-        vn.push_back(Node(row + 1, col, 'v', 1, value + v, this));
+        vn.push_back(Node(row + 1, col, 'v', 1, value + arr[row + 1][col]));
       }
     }
 
@@ -91,14 +90,110 @@ struct Node
     {
       if (times < 3 && direction != 'v')
       {
-        vn.push_back(Node(row - 1, col, '^', times + 1, value + v, this));
+        vn.push_back(Node(row - 1, col, '^', times + 1, value + arr[row - 1][col]));
       }
     }
     else
     {
       if (direction != 'v')
       {
-        vn.push_back(Node(row - 1, col, '^', 1, value + v, this));
+        vn.push_back(Node(row - 1, col, '^', 1, value + arr[row - 1][col]));
+      }
+    }
+
+    return vn;
+  }
+
+  vector<Node> NextV2(short arr[rows][columns])
+  {
+    vector<Node> vn;
+    if (times < 4)
+    {
+      if (direction == '<')
+      {
+        vn.push_back(Node(row, col - 1, '<', times + 1, value + arr[row][col - 1]));
+      }
+      else if (direction == '>')
+      {
+        vn.push_back(Node(row, col + 1, '>', times + 1, value + arr[row][col + 1]));
+      }
+      else if (direction == 'v')
+      {
+        vn.push_back(Node(row + 1, col, 'v', times + 1, value + arr[row + 1][col]));
+      }
+      else if (direction == '^')
+      {
+        vn.push_back(Node(row - 1, col, '^', times + 1, value + arr[row - 1][col]));
+      }
+      else
+      {
+        throw runtime_error("Invalid direction " + direction);
+      }
+    }
+    else
+    {
+      // left
+      if (direction == '<')
+      {
+        if (times < 10 && direction != '>')
+        {
+          vn.push_back(Node(row, col - 1, '<', times + 1, value + arr[row][col - 1]));
+        }
+      }
+      else
+      {
+        if (direction != '>')
+        {
+          vn.push_back(Node(row, col - 1, '<', 1, value + arr[row][col - 1]));
+        }
+      }
+
+      // right
+      if (direction == '>')
+      {
+        if (times < 10 && direction != '<')
+        {
+          vn.push_back(Node(row, col + 1, '>', times + 1, value + arr[row][col + 1]));
+        }
+      }
+      else
+      {
+        if (direction != '<')
+        {
+          vn.push_back(Node(row, col + 1, '>', 1, value + arr[row][col + 1]));
+        }
+      }
+
+      // bottom
+      if (direction == 'v')
+      {
+        if (times < 10 && direction != '^')
+        {
+          vn.push_back(Node(row + 1, col, 'v', times + 1, value + arr[row + 1][col]));
+        }
+      }
+      else
+      {
+        if (direction != '^')
+        {
+          vn.push_back(Node(row + 1, col, 'v', 1, value + arr[row + 1][col]));
+        }
+      }
+
+      // top
+      if (direction == '^')
+      {
+        if (times < 10 && direction != 'v')
+        {
+          vn.push_back(Node(row - 1, col, '^', times + 1, value + arr[row - 1][col]));
+        }
+      }
+      else
+      {
+        if (direction != 'v')
+        {
+          vn.push_back(Node(row - 1, col, '^', 1, value + arr[row - 1][col]));
+        }
       }
     }
 
@@ -132,48 +227,82 @@ long solve(vector<string> input)
   }
 
   priority_queue<Node> minHeap;
-  set<tuple<int, int, int>> vis;
-  Node n(0, 0, '>', 1, 0);
-  Node *current = nullptr;
+  set<tuple<int, int, int, int>> vis;
+  Node *found;
   minHeap.push(Node(0, 0, '>', 1, 0));
   minHeap.push(Node(0, 0, 'v', 1, 0));
   while (!minHeap.empty())
   {
-    n = minHeap.top();
+    Node n = minHeap.top();
     minHeap.pop();
     if (n.row == max_row - 1 && n.col == max_col - 1)
     {
-      current = &n;
+      found = &n;
       cout << "found.. " << n.Display() << endl;
       break;
     }
 
-    if (vis.find({n.row, n.col, n.direction}) != vis.end() || crossed_boarder(n.row, n.col, max_row, max_col))
+    if (vis.find({n.row, n.col, n.direction, n.times}) != vis.end() || crossed_boarder(n.row, n.col, max_row, max_col))
     {
       continue;
     };
 
-    cout << "visiting.. " << n.Display() << endl;
-    vis.insert({n.row, n.col, n.direction});
+    vis.insert({n.row, n.col, n.direction, n.times});
 
-    for (Node adj : n.Next(arr[n.row][n.col]))
+    for (Node adj : n.Next(arr))
     {
       minHeap.push(adj);
     }
   }
 
-  while (current != nullptr)
-  {
-    cout << "back tracking.. " << current->Display() << endl;
-    current = current->prev;
-  }
-
-  return n.value;
+  return found->value;
 }
 
 long solve2(vector<string> input)
 {
-  return 0;
+  short arr[rows][columns];
+  int max_row = input.size();
+  int max_col = input[0].size();
+  for (int i = 0; i < max_row; i++)
+  {
+    for (int j = 0; j < max_col; j++)
+    {
+      arr[i][j] = input[i][j] - '0';
+    }
+  }
+
+  priority_queue<Node> minHeap;
+  set<tuple<int, int, int, int>> vis;
+  Node *found;
+  minHeap.push(Node(0, 0, '>', 1, 0));
+  minHeap.push(Node(0, 0, 'v', 1, 0));
+  while (!minHeap.empty())
+  {
+    Node n = minHeap.top();
+    minHeap.pop();
+    if (n.row == max_row - 1 && n.col == max_col - 1 && n.value > 4)
+    {
+      found = &n;
+      cout << "found.. " << n.Display() << endl;
+      break;
+    }
+
+    if (vis.find({n.row, n.col, n.direction, n.times}) != vis.end() || crossed_boarder(n.row, n.col, max_row, max_col))
+    {
+      continue;
+    };
+
+    // cout << "visiting.. " << n.Display() << endl;
+
+    vis.insert({n.row, n.col, n.direction, n.times});
+
+    for (Node adj : n.NextV2(arr))
+    {
+      minHeap.push(adj);
+    }
+  }
+
+  return found->value;
 }
 
 int test()
