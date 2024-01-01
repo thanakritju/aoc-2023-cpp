@@ -6,6 +6,8 @@
 #include <ranges>
 #include <sstream>
 #include <queue>
+#include <map>
+#include <set>
 
 #define VERBOSE
 
@@ -21,10 +23,93 @@ struct Node
   char direction;
   short times;
   int value;
+  Node *prev;
+
+  Node(int r, int c, char dir, short t, int val, Node *prevNode = nullptr)
+      : row(r), col(c), direction(dir), times(t), value(val), prev(prevNode)
+  {
+  }
 
   bool operator<(const Node &other) const
   {
     return value > other.value;
+  }
+
+  vector<Node> Next(int v)
+  {
+    vector<Node> vn;
+    // left
+    if (direction == '<')
+    {
+      if (times < 3 && direction != '>')
+      {
+        vn.push_back(Node(row, col - 1, '<', times + 1, value + v, this));
+      }
+    }
+    else
+    {
+      if (direction != '>')
+      {
+        vn.push_back(Node(row, col - 1, '<', 1, value + v, this));
+      }
+    }
+
+    // right
+    if (direction == '>')
+    {
+      if (times < 3 && direction != '<')
+      {
+        vn.push_back(Node(row, col + 1, '>', times + 1, value + v, this));
+      }
+    }
+    else
+    {
+      if (direction != '<')
+      {
+        vn.push_back(Node(row, col + 1, '>', 1, value + v, this));
+      }
+    }
+
+    // bottom
+    if (direction == 'v')
+    {
+      if (times < 3 && direction != '^')
+      {
+        vn.push_back(Node(row + 1, col, 'v', times + 1, value + v, this));
+      }
+    }
+    else
+    {
+      if (direction != '^')
+      {
+        vn.push_back(Node(row + 1, col, 'v', 1, value + v, this));
+      }
+    }
+
+    // top
+    if (direction == '^')
+    {
+      if (times < 3 && direction != 'v')
+      {
+        vn.push_back(Node(row - 1, col, '^', times + 1, value + v, this));
+      }
+    }
+    else
+    {
+      if (direction != 'v')
+      {
+        vn.push_back(Node(row - 1, col, '^', 1, value + v, this));
+      }
+    }
+
+    return vn;
+  }
+
+  string Display()
+  {
+    std::stringstream ss;
+    ss << "col: " << col << " row: " << row << " direction: " << direction << " times: " << times << " value: " << value;
+    return ss.str();
   }
 };
 
@@ -47,22 +132,43 @@ long solve(vector<string> input)
   }
 
   priority_queue<Node> minHeap;
-  Node n;
-  n.col = 0;
-  n.row = 0;
-  n.direction = '>';
-  n.times = 1;
-  n.value = 0;
-  Node n2;
-  n2.col = 0;
-  n2.row = 0;
-  n2.direction = 'v';
-  n2.times = 1;
-  n2.value = 0;
-  minHeap.push(n);
-  minHeap.push(n2);
+  set<tuple<int, int, int>> vis;
+  Node n(0, 0, '>', 1, 0);
+  Node *current = nullptr;
+  minHeap.push(Node(0, 0, '>', 1, 0));
+  minHeap.push(Node(0, 0, 'v', 1, 0));
+  while (!minHeap.empty())
+  {
+    n = minHeap.top();
+    minHeap.pop();
+    if (n.row == max_row - 1 && n.col == max_col - 1)
+    {
+      current = &n;
+      cout << "found.. " << n.Display() << endl;
+      break;
+    }
 
-  return 0;
+    if (vis.find({n.row, n.col, n.direction}) != vis.end() || crossed_boarder(n.row, n.col, max_row, max_col))
+    {
+      continue;
+    };
+
+    cout << "visiting.. " << n.Display() << endl;
+    vis.insert({n.row, n.col, n.direction});
+
+    for (Node adj : n.Next(arr[n.row][n.col]))
+    {
+      minHeap.push(adj);
+    }
+  }
+
+  while (current != nullptr)
+  {
+    cout << "back tracking.. " << current->Display() << endl;
+    current = current->prev;
+  }
+
+  return n.value;
 }
 
 long solve2(vector<string> input)
