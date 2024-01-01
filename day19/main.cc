@@ -7,8 +7,8 @@
 #include <sstream>
 #include <map>
 #include <regex>
-
-#define VERBOSE
+#include <set>
+#include <stack>
 
 using namespace std;
 
@@ -45,21 +45,97 @@ struct Rating
 
 struct Ranges
 {
-  vector<pair<int, int>> x;
-  vector<pair<int, int>> m;
-  vector<pair<int, int>> a;
-  vector<pair<int, int>> s;
+  map<char, set<int>> map;
 
-  Ranges(int start, int end)
+  Ranges()
   {
-    x = {{start, end}};
-    m = {{start, end}};
-    a = {{start, end}};
-    s = {{start, end}};
+    map['x'] = {};
+    map['m'] = {};
+    map['a'] = {};
+    map['s'] = {};
+  }
+
+  void Init()
+  {
+    for (int i = 1; i <= 4000; i++)
+    {
+      map['x'].insert(i);
+      map['m'].insert(i);
+      map['a'].insert(i);
+      map['s'].insert(i);
+    }
+  }
+
+  Ranges(const Ranges &other)
+  {
+    for (pair<char, set<int>> each : other.map)
+    {
+      for (int i : each.second)
+      {
+        map[each.first].insert(i);
+      }
+    }
+  }
+
+  pair<Ranges, Ranges> Split(char c, char direction, int threshold)
+  {
+    Ranges other1 = Ranges(*this);
+    Ranges other2 = Ranges(*this);
+    for (int i = 1; i <= 4000; i++)
+    {
+      if (direction == '>')
+      {
+        if (i > threshold)
+        {
+          other2.map[c].erase(i);
+        }
+        else
+        {
+          other1.map[c].erase(i);
+        }
+      }
+      else if (direction == '<')
+      {
+        if (i < threshold)
+        {
+          other2.map[c].erase(i);
+        }
+        else
+        {
+          other1.map[c].erase(i);
+        }
+      }
+      else
+      {
+        throw std::runtime_error("Invalid direction " + direction);
+      }
+    }
+    return {other1, other2};
   }
 
   long long Cal()
   {
+    long long sx = 0;
+    long long sm = 0;
+    long long sa = 0;
+    long long ss = 0;
+    for (int _ : map['x'])
+    {
+      sx++;
+    }
+    for (int _ : map['m'])
+    {
+      sm++;
+    }
+    for (int _ : map['a'])
+    {
+      sa++;
+    }
+    for (int _ : map['s'])
+    {
+      ss++;
+    }
+    return sx * sm * sa * ss;
   }
 };
 
@@ -192,7 +268,7 @@ long solve(vector<string> input)
   return sum;
 }
 
-long solve2(vector<string> input)
+long long solve2(vector<string> input)
 {
   smatch match;
   Workflows w;
@@ -224,7 +300,60 @@ long solve2(vector<string> input)
     }
   }
 
-  return 0;
+  long long sum = 0;
+  Ranges r;
+  r.Init();
+
+  stack<pair<string, Ranges>> st;
+  st.push({"in", Ranges(r)});
+  string key;
+
+  while (!st.empty())
+  {
+    pair<string, Ranges> curr = st.top();
+    st.pop();
+
+    key = curr.first;
+    r = curr.second;
+    if (key == "A")
+    {
+      long long delta = r.Cal();
+      sum += delta;
+      continue;
+    }
+
+    if (key == "R")
+    {
+      continue;
+    }
+
+    for (string each : w[key])
+    {
+      if (each.find(':') != -1)
+      {
+        if (std::regex_search(each, match, pattern3))
+        {
+          char key = match.str(1)[0];
+          string operation = match.str(2);
+          int value = stoi(match.str(3));
+          string direction = match.str(4);
+          pair<Ranges, Ranges> p = r.Split(key, operation[0], value);
+          st.push({direction, p.first});
+          r = p.second;
+        }
+        else
+        {
+          std::cerr << "No match found." << std::endl;
+          throw std::runtime_error("No match found.");
+        }
+      }
+      else
+      {
+        st.push({each, Ranges(r)});
+      }
+    }
+  }
+  return sum;
 }
 
 int test()
@@ -257,7 +386,7 @@ int parse_and_run(string path)
     lines.push_back(line);
   }
   long ans1 = solve(lines);
-  long ans2 = solve2(lines);
+  long long ans2 = solve2(lines);
   cout << "--------------------------" << endl;
   cout << "The part 1 answer is " << ans1 << endl;
   cout << "The part 2 answer is " << ans2 << endl;
