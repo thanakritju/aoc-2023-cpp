@@ -5,13 +5,31 @@
 #include <fstream>
 #include <ranges>
 #include <sstream>
+#include <map>
+#include <queue>
 
 #define VERBOSE
 
 using namespace std;
 
-long solve(vector<string> input)
+enum ModuleType
 {
+  Flipflop,
+  Broadcast,
+  Conjunction,
+  Button,
+};
+
+struct Module
+{
+  ModuleType type;
+  bool on;
+  vector<string> destinations;
+};
+
+map<string, Module> init(vector<string> input)
+{
+  map<string, Module> m;
   for (string s : input)
   {
     stringstream ss(s);
@@ -19,14 +37,41 @@ long solve(vector<string> input)
     string token;
     ss >> key;
     ss >> token;
-    cout << "line " << s << endl;
-    cout << "key " << key << " values ";
+    vector<string> destinations;
+    Module mod;
     while (getline(ss, token, ','))
     {
-      cout << token << " ";
+      destinations.push_back(token);
     };
-    cout << endl;
+    mod.destinations = destinations;
+    if (key == "broadcaster")
+    {
+      mod.type = Broadcast;
+      m[key] = mod;
+    }
+    else
+    {
+      if (key[0] == '%')
+      {
+        mod.type = Flipflop;
+        mod.om = false;
+      }
+      else
+      {
+        mod.type = Conjunction;
+      }
+      m[key.substr(1)] = mod;
+    }
   }
+  return m;
+}
+
+long solve(vector<string> input)
+{
+  map<string, Module> m = init(input);
+  queue<pair<string, bool>> q;
+  q.push({"broadcaster", false});
+
   return 0;
 }
 
