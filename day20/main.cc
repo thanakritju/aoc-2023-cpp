@@ -7,6 +7,7 @@
 #include <sstream>
 #include <map>
 #include <queue>
+#include <set>
 
 #define VERBOSE
 
@@ -109,28 +110,6 @@ struct Module
 
     return v;
   }
-
-  std::size_t hash() const
-  {
-    std::size_t hashValue = 0;
-    hashValue ^= std::hash<ModuleType>{}(type) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
-    for (const auto &str : destinations)
-    {
-      hashValue ^= std::hash<std::string>{}(str) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
-    }
-    hashValue ^= std::hash<bool>{}(on) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
-    for (const auto &pair : memory)
-    {
-      hashValue ^= std::hash<std::string>{}(pair.first) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
-      hashValue ^= std::hash<bool>{}(pair.second) + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
-    }
-    return hashValue;
-  }
-
-  bool operator==(const Module &other) const
-  {
-    return hash() == other.hash();
-  }
 };
 
 bool isInitial(map<string, Module> m)
@@ -227,8 +206,8 @@ map<string, Module> init(vector<string> input)
 long solve(vector<string> input)
 {
   map<string, Module> m = init(input);
-  int times = 0;
-  print(m);
+  int times = 999;
+  // print(m);
   vector<pair<int, int>> v;
   int lows = 0;
   int highs = 0;
@@ -245,7 +224,7 @@ long solve(vector<string> input)
       string previousKey = get<0>(curr);
       bool isHigh = get<1>(curr);
       string key = get<2>(curr);
-      cout << previousKey << " -" << isHigh << "-> " << key << endl;
+      // cout << previousKey << " -" << isHigh << "-> " << key << endl;
 
       if (isHigh)
       {
@@ -260,7 +239,7 @@ long solve(vector<string> input)
         q.push(t);
       }
     }
-    cout << "lows: " << lows << " highs: " << highs << endl;
+    // cout << "lows: " << lows << " highs: " << highs << endl;
     v.push_back({lows, highs});
     c++;
     if (isInitial(m) || c > times)
@@ -270,6 +249,10 @@ long solve(vector<string> input)
   }
   cout << "v.size() " << v.size() << endl;
   int count = times / v.size();
+  if (count == 0)
+  {
+    count = 1;
+  }
   int count2 = times % v.size();
   pair<int, int> top = v.back();
 
@@ -278,7 +261,45 @@ long solve(vector<string> input)
 
 long solve2(vector<string> input)
 {
-  return 0;
+  map<string, Module> m = init(input);
+  int c = 0;
+  print(m);
+  map<string, int> found;
+  while (true)
+  {
+    // cout << "round: " << c << endl;
+    queue<tuple<string, bool, string>> q;
+    q.push({"button", false, "broadcaster"});
+
+    while (!q.empty())
+    {
+      tuple<string, bool, string> curr = q.front();
+      q.pop();
+      string previousKey = get<0>(curr);
+      bool isHigh = get<1>(curr);
+      string key = get<2>(curr);
+      if (!isHigh && key == "rg")
+      {
+        if (found.count(previousKey) == 0)
+        {
+          cout << "prev: " << previousKey << " count: " << c << endl;
+          found[previousKey] = c;
+        };
+      }
+
+      for (tuple<string, bool, string> t : m[key].next(previousKey, key, isHigh))
+      {
+        q.push(t);
+      }
+    }
+    c++;
+    if (found.size() >= 4)
+    {
+      break;
+    }
+  }
+
+  return c;
 }
 
 int test()
@@ -302,7 +323,7 @@ int parse_and_run(string path)
   {
     lines.push_back(line);
   }
-  long ans1 = solve(lines);
+  long ans1 = 0;
   long ans2 = solve2(lines);
   cout << "--------------------------" << endl;
   cout << "The part 1 answer is " << ans1 << endl;
