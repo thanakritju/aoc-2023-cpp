@@ -8,6 +8,7 @@
 #include <sstream>
 
 // #define VERBOSE
+using namespace std;
 
 int possible_to_reveal(std::string input)
 {
@@ -128,13 +129,13 @@ int test()
   return 0;
 }
 
-int parse_and_run(std::string_view path)
+int parse_and_run(string path)
 {
-  std::vector<std::string> data;
-  std::fstream file(path);
+  vector<string> data;
+  ifstream file(path);
   if (!file.is_open())
   {
-    std::cerr << "Failed to open " << std::quoted(path) << "\n";
+    cerr << "Failed to open " << path << endl;
     return 1;
   }
 

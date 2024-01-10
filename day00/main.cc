@@ -6,28 +6,37 @@
 #include <fstream>
 #include <ranges>
 
+using namespace std;
+
 int test()
 {
   assert(1);
   return 0;
 }
 
-int parse_and_run(std::string_view path)
+int parse_and_run(string path)
 {
-  std::vector<std::string> data;
-  std::fstream file(path);
+  vector<string> data;
+  ifstream file(path);
   if (!file.is_open())
   {
-    std::cerr << "Failed to open " << std::quoted(path) << "\n";
+    cerr << "Failed to open " << path << endl;
     return 1;
   }
 
-  std::string line;
-  while (std::getline(file, line))
+  vector<string> lines;
+  string line;
+  while (getline(file, line))
   {
-    std::cout << line << " ";
+    lines.push_back(line);
   }
-  std::cout << "\n";
+  long ans1 = 0;
+  long ans2 = 0;
+  cout << "--------------------------" << endl;
+  cout << "The part 1 answer is " << ans1 << endl;
+  cout << "The part 2 answer is " << ans2 << endl;
+  cout << "--------------------------" << endl;
+
   return 0;
 }
 
