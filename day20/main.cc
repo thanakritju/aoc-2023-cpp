@@ -203,6 +203,25 @@ map<string, Module> init(vector<string> input)
   return m;
 }
 
+int gcd(int a, int b)
+{
+  if (b == 0)
+    return a;
+  return gcd(b, a % b);
+}
+
+long long int lcm_all(map<string, int> &numbers)
+{
+  long long int result = 1;
+  for (pair<string, int> p : numbers)
+  {
+    cout << p.second << " ";
+    result = (result * p.second) / gcd(p.second, result);
+  }
+  cout << endl;
+  return result;
+}
+
 long solve(vector<string> input)
 {
   map<string, Module> m = init(input);
@@ -259,15 +278,14 @@ long solve(vector<string> input)
   return top.first * count * top.second * count;
 }
 
-long solve2(vector<string> input)
+long long int solve2(vector<string> input)
 {
   map<string, Module> m = init(input);
-  int c = 0;
+  int c = 1;
   print(m);
   map<string, int> found;
   while (true)
   {
-    // cout << "round: " << c << endl;
     queue<tuple<string, bool, string>> q;
     q.push({"button", false, "broadcaster"});
 
@@ -278,7 +296,7 @@ long solve2(vector<string> input)
       string previousKey = get<0>(curr);
       bool isHigh = get<1>(curr);
       string key = get<2>(curr);
-      if (!isHigh && key == "rg")
+      if (isHigh && key == "rg")
       {
         if (found.count(previousKey) == 0)
         {
@@ -299,7 +317,7 @@ long solve2(vector<string> input)
     }
   }
 
-  return c;
+  return lcm_all(found);
 }
 
 int test()
@@ -323,8 +341,8 @@ int parse_and_run(string path)
   {
     lines.push_back(line);
   }
-  long ans1 = 0;
-  long ans2 = solve2(lines);
+  long ans1 = solve(lines);
+  long long int ans2 = solve2(lines);
   cout << "--------------------------" << endl;
   cout << "The part 1 answer is " << ans1 << endl;
   cout << "The part 2 answer is " << ans2 << endl;
